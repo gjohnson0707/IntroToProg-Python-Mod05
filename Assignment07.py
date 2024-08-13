@@ -218,25 +218,35 @@ class IOProcessor:
         print("-" * 50)
     @staticmethod
     def output_menu(menu: str) -> str:
+        ''' This function displays the menu of choices to the user
+
+         ChangeLog: (Who, When, What)
+         RRoot,1.1.2030,Created function
+
+
+         :return: None
+         '''
+        print()  # Adding extra space to make it look nicer.
+        print(menu)
+        print()  # Adding extra space to make it look nicer.
+
+    @staticmethod
+    def input_menu_choice(message: str) -> str:
+
         '''
         This function returns the menu options entered by the user
         :param menu: the menu options entered by the user
         :return: the menu options entered by the user
         '''
-        menu_choice = input(menu)
-        while menu_choice not in ("1", "2", "3", "4"):
-            IOProcessor.output_error_message('please enter an option 1,2,3,4')
-            menu_choice = input(menu)
-        return menu_choice
+        menu_choice = "0"
+        try:
+            menu_choice = input("Select menu choice number: ")
+            if menu_choice not in ("1", "2", "3", "4"):  # Note these are strings
+                raise Exception("Please, choose only 1, 2, 3, or 4")
+        except Exception as e:
+            IOProcessor.output_error_messages(e.__str__())
 
-    @staticmethod
-    def get_input(message: str) -> str:
-        '''
-        Gets the input from the user
-        :param message: the messages to print
-        :return: users input
-        '''
-        return input(message)
+        return menu_choice
     @staticmethod
     def input_student_data(student_data: list[Student]) -> list[Student]:
         '''
@@ -250,17 +260,17 @@ class IOProcessor:
         course_name: str = ''
         student: Student
         try:  # Error handling
-            student_first_name = IOProcessor.get_input("Enter the student's first name: ")
+            student_first_name = input("Enter the student's first name: ")
             if not student_first_name.isalpha():
                 raise ValueError(
                     "Student First Name must be alpha characters only")  # Error handling for numerics in name
 
-            student_last_name = IOProcessor.get_input("Enter the student's last name: ")
+            student_last_name = input("Enter the student's last name: ")
             if not student_last_name.isalpha():  #
                 raise ValueError(
                     "Student First Name must be alpha characters only")  # Error handling for numerics in name
 
-            course_name = IOProcessor.get_input("Please enter the name of the course: ")
+            course_name = input("Please enter the name of the course: ")
             new_student = Student(
                 student_first_name= student_first_name,
                 student_last_name=student_last_name,
@@ -290,7 +300,9 @@ class IOProcessor:
         @return:
         '''
         for student in student_data:
-            IOProcessor.output_student_courses(f'{student.student_first_name} {student.student_last_name} is registered for {student.course_name}.')
+            for student in student_data:
+                print(f'Student {student["Student_First_Name"]} '
+                      f'{student["Student_Last_Name"]} is enrolled in {student["Course_Name"]}')
 
 
 # Define the Data Variables
@@ -304,32 +316,32 @@ students: list[Student] = FileProcessor.read_data_from_file(file_name=FILE_NAME)
 IOProcessor.output_student_courses(student_data=students)
 
 
-while True:
-    menu_choice = IOProcessor.output_menu(MENU)
+while (True):
 
+    # Present the menu of choices
+    IOProcessor.output_menu(menu=MENU)
+
+    menu_choice = IOProcessor.input_menu_choice(message=MENU)
+
+    # Input user data
     if menu_choice == "1":  # This will not work if it is an integer!
-        try:  # Error handling
-            students = IOProcessor.input_student_data(student_data=students)
-
-        except ValueError as e:
-            IOProcessor.output_error_message(e)
-        except Exception as e:  # Catch any other unexpected exceptions
-            IOProcessor.output_error_message("An unexpected error occurred", e)
+        students = IOProcessor.input_student_data(student_data=students)
+        continue
 
     # Present the current data
     elif menu_choice == "2":
-
-        # Process the data to create and display a custom message
-        IOProcessor.output_student_courses(student_data=students)
+        IOProcessor.output_student_courses(students)
+        continue
 
     # Save the data to a file
     elif menu_choice == "3":
-        FileProcessor.write_data_to_file(student_data=students, file_name=FILE_NAME)
+        FileProcessor.write_data_to_file(file_name=FILE_NAME, student_data=students)
+        continue
 
     # Stop the loop
     elif menu_choice == "4":
         break  # out of the loop
     else:
-        IOProcessor.output_error_message("Please only choose option 1, 2, or 3")
+        print("Please only choose option 1, 2, or 3")
 
 print("Program Ended")
